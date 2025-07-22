@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PhishShield™ | Trust Report</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top left, #e3f2fd, #cfd8dc);
+      margin-bottom: 80px;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      transition: transform 0.2s;
+    }
+    .glass-card:hover {
+      transform: scale(1.005);
+    }
+    .section-title {
+      font-weight: 700;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+    }
+    .section-title i {
+      margin-right: 10px;
+      color: #007bff;
+    }
+    .btn-gradient {
+      background: linear-gradient(45deg, #007bff, #00bcd4);
+      color: white;
+      border: none;
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(45deg, #0056b3, #0097a7);
+    }
+    .badge-verdict {
+      font-size: 1rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+    .footer-watermark {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      font-size: 0.85rem;
+      opacity: 0.8;
+      padding: 12px;
+      text-align: right;
+    }
+    .footer-watermark a {
+      color: #444;
+      text-decoration: none;
+      margin-left: 5px;
+    }
+    .footer-watermark a:hover {
+      text-decoration: underline;
+    }
+    .icon {
+      font-size: 1.1rem;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5 mb-5">
+  <!-- Header Card -->
+  <div class="glass-card">
+    <h3 class="section-title"><i class="bi bi-shield-lock-fill"></i> Website Trust Analysis Report</h3>
+    <p><strong>🌐 URL:</strong> {{ url }}</p>
+    <p><strong>🧮 Trust Score:</strong> <span class="fw-bold">{{ trust_score }}%</span></p>
+    <p><strong>🎯 Verdict:</strong>
+      {% if trust_score < 50 %}
+        <span class="badge bg-danger badge-verdict">Not Trustworthy</span>
+      {% elif trust_score < 75 %}
+        <span class="badge bg-warning text-dark badge-verdict">Potentially Untrustworthy</span>
+      {% else %}
+        <span class="badge bg-success badge-verdict">Trustworthy</span>
+      {% endif %}
+    </p>
+    {% if result.override_reason and result.override_reason != "None" %}
+      <div class="alert alert-danger mt-3 mb-3">
+        <strong>🚫 Override Triggered:</strong> {{ result.override_reason }}
+      </div>
+    {% endif %}
+    <p><strong>🧠 Intent Detected:</strong> {{ nlp_intent.intent }} ({{ (nlp_intent.confidence * 100) | round(2) }}%)</p>
+  </div>
+
+  <!-- Warnings -->
+  <div class="glass-card">
+    <h5 class="section-title"><i class="bi bi-exclamation-diamond"></i> Triggered Warnings</h5>
+    {% if triggered_checks %}
+      <ul>
+        {% for f in triggered_checks %}
+          <li class="{% if '✅' in f %}text-success{% else %}text-danger{% endif %}">{{ f }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-success">✅ No critical warnings triggered.</p>
+    {% endif %}
+  </div>
+
+  <!-- Screenshot & OCR -->
+  <div class="glass-card">
+    <h5 class="section-title"><i class="bi bi-eye-fill"></i> Screenshot & OCR</h5>
+    <img src="/{{ screenshot_url }}" alt="Website Screenshot" class="img-fluid rounded border mb-3">
+    <div class="p-2 border rounded bg-light" style="max-height: 200px; overflow-y: auto;">
+      <code style="white-space: pre-wrap;">{{ ocr_text }}</code>
+    </div>
+  </div>
+
+  <!-- Detector Table -->
+  <div class="glass-card">
+    <h5 class="section-title"><i class="bi bi-hdd-network"></i> Detailed Detector Results</h5>
+    <table class="table table-bordered table-striped align-middle">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 30%;">Detector</th>
+          <th>Result / Warnings</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for title, flags, default_msg in [
+            ('TLS Certificate', tls_result.flags, '✅ TLS certificate appears valid'),
+            ('WHOIS & Domain Info', domain_info.flags, '✅ WHOIS data appears normal'),
+            ('URL Structure', url_features.flags, '✅ URL structure appears normal'),
+            ('JavaScript Behavior', js_flags, '✅ No suspicious JavaScript detected'),
+            ('Visual Layout / Logo Match', visual_flags, '✅ No visual anomalies found'),
+            ('DOM/Form Structure', dom_flags, '✅ DOM structure appears safe')
+          ] %}
+        <tr>
+          <td><strong>{{ title }}</strong></td>
+          <td>
+            <ul class="mb-0">
+              {% if flags %}
+                {% for f in flags %}
+                  <li class="{% if '✅' in f %}text-success{% else %}text-danger{% endif %}">{{ f }}</li>
+                {% endfor %}
+              {% else %}
+                <li class="text-success">{{ default_msg }}</li>
+              {% endif %}
+            </ul>
+          </td>
+        </tr>
+        {% endfor %}
+
+        <!-- ✅ Updated Visual Trust Score (AI based) -->
+        <tr>
+          <td><strong>Visual Trust Score (AI)</strong></td>
+          <td>
+            {% if visual_score >= 85 %}
+              <span class="text-danger fw-bold">⚠️ {{ visual_score | round(1) }}% match with {{ matched_brand }}</span>
+            {% elif visual_score >= 65 %}
+              <span class="text-warning fw-bold">⚠️ Possible match: {{ visual_score | round(1) }}% with {{ matched_brand }}</span>
+            {% else %}
+              <span class="text-success fw-bold">✅ No suspicious match ({{ visual_score | round(1) }}%)</span>
+            {% endif %}
+          </td>
+        </tr>
+
+        <tr>
+          <td><strong>NLP Trust Intent</strong></td>
+          <td>
+            <strong>Intent:</strong> {{ nlp_intent.intent }}<br>
+            <strong>Confidence:</strong> {{ (nlp_intent.confidence * 100) | round(2) }}%
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Buttons -->
+  <div class="d-flex justify-content-between">
+    <a href="/manual-check" class="btn btn-gradient"><i class="bi bi-arrow-repeat"></i> Run Another Check</a>
+    <button onclick="window.print()" class="btn btn-outline-dark"><i class="bi bi-printer"></i> Save as PDF</button>
+  </div>
+</div>
+
+<!-- Final Verdict -->
+<div class="p-4 rounded shadow-sm mx-3 mt-4
+  {% if trust_score < 45 %}bg-danger text-white
+  {% elif trust_score < 70 %}bg-warning text-dark
+  {% else %}bg-success text-white{% endif %}">
+
+  <h4 class="mb-3">🔍 Final Website Verdict</h4>
+  <p class="mb-1"><strong>URL:</strong> {{ url }}</p>
+  <p class="mb-1"><strong>Intent Detection Score:</strong> {{ (nlp_intent.confidence * 100) | round(2) }}%</p>
+  <p class="mb-0"><strong>Final Verdict:</strong> 
+    <span class="fw-bold">
+      {% if verdict == 'Not Trustworthy' %}
+        🚫 {{ verdict }}
+      {% elif verdict == 'Potentially Untrustworthy' %}
+        ⚠️ {{ verdict }}
+      {% else %}
+        ✅ {{ verdict }}
+      {% endif %}
+    </span>
+  </p>
+</div>
+
+<!-- Footer -->
+<div class="footer-watermark">
+  Built by <strong>Karthik B</strong> <br>
+  <a href="https://github.com/KArT4206" target="_blank"><i class="bi bi-github icon"></i> GitHub</a> |
+  <a href="https://www.linkedin.com/in/karthik-b-0b8905362/" target="_blank"><i class="bi bi-linkedin icon"></i> LinkedIn</a>
+</div>
+<a href="/logout" class="btn btn-danger" style="position: absolute; top: 20px; right: 20px;">
+  Logout
+</a>
+
+
+</body>
+</html>

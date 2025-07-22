@@ -1,0 +1,4 @@
+pyrebase4
+getmac
+requests
+pyrebase
