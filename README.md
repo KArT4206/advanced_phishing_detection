@@ -78,12 +78,16 @@ Traditional blacklist or signature-based approaches are increasingly ineffective
 ## Screenshots
 Home Page:
 ![home](image/home.png)
+
 Registration Page:
 ![register](image/register.png)
+
 Login Page:
 ![login](image/login.png)
+
 Admin Page:
 ![admin](image/admin.jpg)
+
 Result:
 ![page001](image/001.jpg)
 ![page002](image/002.jpg)
