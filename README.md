@@ -142,4 +142,4 @@ Result:
 
 ## License
 
-This project is licensed.
+This project is licensed by GPL-3.0 license.
