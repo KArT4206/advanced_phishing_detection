@@ -74,9 +74,9 @@ Traditional blacklist or signature-based approaches are increasingly ineffective
 }
 ```
 ## Screenshots
-![home](image/home.jpg)
-![register](image/register.jpg)
-![login](image/login.jpg)
+![home](image/home.png)
+![register](image/register.png)
+![login](image/login.png)
 ![admin](image/admin.jpg)
 ![page001](image/001.jpg)
 ![page002](image/002.jpg)
