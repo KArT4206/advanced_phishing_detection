@@ -1,0 +1,29 @@
+Flask
+beautifulsoup4
+cryptography
+dnspython
+getmac
+joblib
+matplotlib
+numpy
+pandas
+pillow
+pyrebase4
+pytesseract
+python-whois
+requests
+scikit-learn
+selenium
+torch
+transformers
+urllib3
+
+
+
+pip install -r requirements.txt
+
+
+pip install --upgrade pyrebase4
+
+
+python app.py
