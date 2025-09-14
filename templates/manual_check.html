@@ -46,10 +46,36 @@
     .footer-watermark a:hover {
       text-decoration: underline;
     }
+    .navbar {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">PhishShield™</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a href="/manual-check" class="nav-link active">Manual Check</a>
+          </li>
+          {% if is_admin %}
+          <li class="nav-item">
+            <a href="/admin" class="btn btn-danger btn-sm ms-2">Admin Dashboard</a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a href="/logout" class="btn btn-outline-light btn-sm ms-2">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
   <div class="container">
     <div class="glass-card">
       <h2 class="mb-4"><i class="bi bi-search"></i> Manual Website Trust Check</h2>
@@ -58,7 +84,9 @@
           <label for="url" class="form-label">🌐 Enter Website URL:</label>
           <input type="text" class="form-control" name="url" placeholder="https://example.com" required>
         </div>
-        <button type="submit" class="btn btn-gradient w-100"><i class="bi bi-shield-check"></i> Analyze Now</button>
+        <button type="submit" class="btn btn-gradient w-100">
+          <i class="bi bi-shield-check"></i> Analyze Now
+        </button>
       </form>
       <div class="mt-3">
         <a href="/" class="btn btn-link">⬅ Back to Home</a>
@@ -66,15 +94,12 @@
     </div>
   </div>
 
+  <!-- Footer -->
   <div class="footer-watermark">
     Built by <strong>Karthik B</strong> <br>
     <a href="https://github.com/KArT4206" target="_blank"><i class="bi bi-github"></i> GitHub</a> |
     <a href="https://www.linkedin.com/in/karthik-b-0b8905362/" target="_blank"><i class="bi bi-linkedin"></i> LinkedIn</a>
   </div>
-  <a href="/logout" class="btn btn-danger" style="position: absolute; top: 20px; right: 20px;">
-  Logout
-  </a>
-
 
 </body>
 </html>
