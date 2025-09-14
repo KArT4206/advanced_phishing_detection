@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, session, url_for, jsonify
 import os
+from datetime import datetime
 import auth_utils
 from auth_utils import auth, store_login_info, get_client_ip, get_mac
 from run_all_detectors import run_all_detectors
@@ -7,7 +8,7 @@ from run_all_detectors import run_all_detectors
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Define admin email
+# --- Admin Email ---
 ADMIN_EMAIL = "karthikb0404@gmail.com"
 
 # --- Home Redirect ---
@@ -28,7 +29,9 @@ def login():
             session['user'] = email
             ip = get_client_ip()
             mac = get_mac()
-            store_login_info(email, ip, mac, password=password)
+            # Store login info with timestamp
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            store_login_info(email, ip, mac, password=password, timestamp=timestamp)
             return redirect('/manual-check')
         except Exception as e:
             return f"Login Failed: {str(e)}"
@@ -55,7 +58,8 @@ def logout():
 def dashboard():
     if 'user' not in session:
         return redirect('/login')
-    return f"Welcome, {session['user']}"
+    is_admin = (session['user'] == ADMIN_EMAIL)
+    return render_template("dashboard.html", user=session['user'], is_admin=is_admin)
 
 @app.route('/admin')
 def admin():
@@ -63,14 +67,27 @@ def admin():
         return redirect('/login')
     if session['user'] != ADMIN_EMAIL:
         return "Access Denied: You are not an admin."
+    
+    # Fetch all login info
     login_info = auth_utils.db.child("login_info").get().val()
-    return render_template('admin_dashboard.html', login_data=login_info)
+    
+    # Keep only the last login per user
+    last_logins = {}
+    if login_info:
+        for key, entry in login_info.items():
+            email = entry.get("email")
+            if email not in last_logins or entry.get("timestamp", "") > last_logins[email].get("timestamp", ""):
+                last_logins[email] = entry
+
+    return render_template('admin_dashboard.html', login_data=last_logins, is_admin=True)
 
 # --- Manual Check ---
 @app.route("/manual-check", methods=["GET", "POST"])
 def manual_check():
     if 'user' not in session:
         return redirect('/login')
+    is_admin = (session['user'] == ADMIN_EMAIL)
+
     if request.method == "POST":
         url = request.form.get("url")
         result = run_all_detectors(url)
@@ -91,9 +108,10 @@ def manual_check():
             url_features=result["url_features"],
             js_flags=result["js_flags"],
             visual_flags=result["visual_flags"],
-            dom_flags=result["dom_flags"]
+            dom_flags=result["dom_flags"],
+            is_admin=is_admin
         )
-    return render_template("manual_check.html")
+    return render_template("manual_check.html", is_admin=is_admin)
 
 # --- Chrome Extension API ---
 @app.route("/api/check", methods=["POST"])
@@ -103,7 +121,7 @@ def api_check():
     result = run_all_detectors(url)
     return jsonify(result)
 
-# --- Static Files (Screenshots etc) ---
+# --- Static Files ---
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return app.send_static_file(filename)
