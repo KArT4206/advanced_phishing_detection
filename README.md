@@ -1,4 +1,4 @@
-# Advanced Phishing Detection (Flask + Heuristics)
+# Multi-Heuristic Phishing Detection System Using TLS, WHOIS, and OCR
 
 A powerful Flask-based backend that detects phishing websites using multiple heuristic techniques—including TLS certificate validation, WHOIS domain checks, and OCR-based content analysis. Designed for easy integration, academic demonstrations, and extensibility into advanced cybersecurity systems.
 
