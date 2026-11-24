@@ -1,5 +1,8 @@
 # PhishShield™ – Multi-Heuristic Phishing Detection System
 
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue)](LICENSE)
+![Last commit](https://img.shields.io/github/last-commit/KArT4206/advanced_phishing_detection)
+
 A Flask web application that scores how trustworthy a website is by running **seven independent detectors** (TLS, WHOIS, URL structure, JavaScript, DOM, visual similarity, and NLP intent over OCR text) and combining them into a single **trust score** and verdict: `Legit`, `Potentially Untrustworthy`, or `Not Trustworthy`.
 
 > This repository documents the project (description, design, screenshots). The source code lives in a private repository, `advanced_phishing_detection-code`.
